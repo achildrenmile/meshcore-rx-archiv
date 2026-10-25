@@ -1,0 +1,34 @@
+# Optional. Nur noetig, wenn im Cluster noch kein cloudflared laeuft, der die Adresse
+# meshcoredrive.kaernten-funkt.at auf http://web.rx-archiv.svc.cluster.local:80 zeigen kann.
+# Der Token liegt NICHT im Repo: kubectl -n rx-archiv create secret generic tunnel-token --from-literal=token=...
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tunnel
+  namespace: rx-archiv
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: rx-archiv-tunnel }
+  template:
+    metadata:
+      labels: { app: rx-archiv-tunnel }
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        seccompProfile: { type: RuntimeDefault }
+      containers:
+        - name: cloudflared
+          image: cloudflare/cloudflared:2025.9.1
+          args: ["tunnel", "--no-autoupdate", "run"]
+          env:
+            - name: TUNNEL_TOKEN
+              valueFrom:
+                secretKeyRef: { name: tunnel-token, key: token }
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities: { drop: [ALL] }
+          resources:
+            requests: { cpu: 10m, memory: 32Mi }
+            limits: { cpu: 200m, memory: 128Mi }

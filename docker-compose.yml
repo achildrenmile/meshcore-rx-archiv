@@ -1,0 +1,39 @@
+# Empfangsarchiv: Sammler + Viewer. Der Tunnel ist optional (Profil "tunnel").
+services:
+  collector:
+    build: .
+    restart: unless-stopped
+    environment:
+      MAP_BASE: ${MAP_BASE:-https://map.carinthiamesh.com/api/}
+      BBOX: ${BBOX:-45.6,12.0,47.7,15.6}
+    volumes:
+      - archiv-db:/data
+      - webdata:/web-data
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    restart: unless-stopped
+    depends_on: [collector]
+    environment:
+      CARTO_KEY: ${CARTO_KEY:-}
+    ports:
+      - "${WEB_PORT:-8088}:8080"
+    volumes:
+      - webdata:/usr/share/nginx/html/data:ro
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/healthz"]
+      interval: 1m
+
+  tunnel:
+    image: cloudflare/cloudflared:2025.9.1
+    profiles: ["tunnel"]
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${TUNNEL_TOKEN:-}
+
+volumes:
+  archiv-db:
+  webdata:

@@ -1,0 +1,75 @@
+# Ein Pod, zwei Container: der Sammler schreibt, nginx liest. SQLite vertraegt nur einen Schreiber,
+# deshalb genau ein Replikat und Recreate statt Rolling.
+# Images werden bei einem v*-Tag von .github/workflows/build.yml nach GHCR gebaut; ausgerollt wird per Digest.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rx-archiv
+  namespace: rx-archiv
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: rx-archiv
+  template:
+    metadata:
+      labels:
+        app: rx-archiv
+    spec:
+      imagePullSecrets:
+        - name: ghcr-pull-secret
+      securityContext:
+        fsGroup: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: collector
+          image: ghcr.io/achildrenmile/meshcore-rx-archiv-collector:sha-0000000
+          env:
+            - { name: MAP_BASE, value: "https://map.carinthiamesh.com/api/" }
+            - { name: BBOX, value: "45.6,12.0,47.7,15.6" }
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10001
+            runAsGroup: 10001
+            allowPrivilegeEscalation: false
+            capabilities: { drop: [ALL] }
+          resources:
+            requests: { cpu: 50m, memory: 64Mi }
+            limits: { cpu: 500m, memory: 256Mi }
+          # Bewusst keine Probe: faellt die Karte aus, soll der Viewer mit den vorhandenen Daten weiter erreichbar bleiben.
+          # Veraltete Daten zeigt der Viewer selbst an; von aussen pruefbar ueber das Alter von /data/meta.json.
+          volumeMounts:
+            - { name: data, mountPath: /data }
+            - { name: webdata, mountPath: /web-data }
+        - name: web
+          image: ghcr.io/achildrenmile/meshcore-rx-archiv-web:sha-0000000
+          env:
+            - name: CARTO_KEY
+              valueFrom: { secretKeyRef: { name: carto-key, key: key } }
+          ports:
+            - { name: http, containerPort: 8080 }
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 101
+            allowPrivilegeEscalation: false
+            capabilities: { drop: [ALL] }
+          resources:
+            requests: { cpu: 10m, memory: 16Mi }
+            limits: { cpu: 200m, memory: 64Mi }
+          readinessProbe:
+            httpGet: { path: /healthz, port: http }
+            periodSeconds: 30
+          livenessProbe:
+            httpGet: { path: /healthz, port: http }
+            periodSeconds: 60
+            failureThreshold: 5
+          volumeMounts:
+            - { name: webdata, mountPath: /usr/share/nginx/html/data, readOnly: true }
+      volumes:
+        - name: data
+          persistentVolumeClaim: { claimName: rx-archiv-data }
+        - name: webdata
+          emptyDir: {}

@@ -1,0 +1,22 @@
+# Von Hand anwenden: kubectl apply -f k8s/argocd/application.yaml
+# Das Repo ist oeffentlich, ArgoCD braucht keine Zugangsdaten.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: rx-archiv
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/achildrenmile/meshcore-rx-archiv.git
+    targetRevision: main
+    path: k8s
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: rx-archiv
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

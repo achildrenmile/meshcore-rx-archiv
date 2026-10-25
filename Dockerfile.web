@@ -1,0 +1,4 @@
+FROM nginxinc/nginx-unprivileged:1.27-alpine
+# nginx ersetzt ${CARTO_KEY} beim Start per envsubst (Template); ohne Key bleibt die dunkle Karte leer
+COPY deploy/nginx.conf /etc/nginx/templates/default.conf.template
+COPY web/ /usr/share/nginx/html/

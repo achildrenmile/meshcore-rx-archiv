@@ -1,0 +1,14 @@
+# Das Archiv (archiv.db) ist das Einzige, was sich nicht neu holen laesst.
+# Backup im dc-Cluster: Longhorn (Label unten -> taeglich 02:30). Fuer Velero-Cluster: Annotation am Deployment.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: rx-archiv-data
+  namespace: rx-archiv
+  labels:
+    recurring-job-group.longhorn.io/stateful-daily: enabled
+spec:
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests:
+      storage: 1Gi

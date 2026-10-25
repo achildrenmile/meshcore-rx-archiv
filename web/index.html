@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#3d4f2f">
+<link rel="icon" href="https://kaernten-funkt.at/wp-content/uploads/2026/04/kaernten-funkt-logo-150x150.jpg">
+<title>Empfangsarchiv Kärnten</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<link rel="stylesheet" href="style.css?v=12">
+</head>
+<body>
+<header id="kopf">
+  <a class="marke" href="https://kaernten-funkt.at" target="_blank" rel="noopener">
+    <img src="https://kaernten-funkt.at/wp-content/uploads/2026/04/kaernten-funkt-logo-150x150.jpg" alt="" width="40" height="40">
+    <span class="marke-text"><b>KÄRNTEN FUNKT</b><small>Empfangsarchiv</small></span>
+  </a>
+  <div id="schnell" role="group" aria-label="Zeitraum">
+    <button type="button" data-tage="7">7 T</button>
+    <button type="button" data-tage="30">30 T</button>
+    <button type="button" data-tage="90">90 T</button>
+    <button type="button" data-tage="0" class="aktiv">Alles</button>
+  </div>
+  <div id="ebenen" role="group" aria-label="Ebene">
+    <button type="button" data-e="signal" class="aktiv">Signal</button>
+    <button type="button" data-e="rausch">Rauschen</button>
+  </div>
+  <button id="thema" type="button" aria-pressed="true" title="Karte hell/dunkel">Dunkel</button>
+  <button id="menue" type="button" aria-controls="panel" aria-expanded="false">Filter</button>
+</header>
+<div id="app">
+<aside id="panel">
+  <div class="griff" id="griff"></div>
+  <p class="sub">Dieses Archiv bewahrt alle Messungen der <a href="https://map.carinthiamesh.com/#/rx-coverage?days=7&lat=46.64762&lon=13.44589&zoom=10" target="_blank" rel="noopener">CoreDrive-Empfangskarte</a> dauerhaft auf. Die Originalkarte zeigt aktuelle Messungen und bietet auch die 30-Tage-Ansicht; diese Seite dient der Archivierung und reicht darüber hinaus zurück.</p>
+
+  <fieldset>
+    <legend>Ebene</legend>
+    <div class="versteckt"><input type="radio" name="ebene" value="signal" checked><input type="radio" name="ebene" value="rausch"></div>
+    <label id="luecken-zeile"><input type="checkbox" id="luecken" checked> befahren, nichts gehört (Lücken)</label>
+  </fieldset>
+
+  <fieldset id="f-zeit">
+    <legend>Zeitraum <span class="hint" id="zeit-hint"></span></legend>
+    <div class="zeile"><select id="von"></select><span>bis</span><select id="bis"></select></div>
+  </fieldset>
+
+  <fieldset id="f-signal">
+    <legend>Signal</legend>
+    <label><input type="checkbox" class="stufe" value="stark" checked> <i class="sw stark"></i> stark (ab −5 dB)</label>
+    <label><input type="checkbox" class="stufe" value="mittel" checked> <i class="sw mittel"></i> mittel (−9 bis −5)</label>
+    <label><input type="checkbox" class="stufe" value="schwach" checked> <i class="sw schwach"></i> schwach (unter −9)</label>
+    <label><input type="checkbox" class="stufe" value="grau" checked> <i class="sw grau"></i> gehört, ohne SNR</label>
+    <div class="zeile"><label for="minrep">mind. Repeater</label><input type="number" id="minrep" min="1" max="20" value="1"></div>
+    <div class="zeile"><label for="mincnt">mind. Empfänge</label><input type="number" id="mincnt" min="1" max="999" value="1"></div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Knoten &amp; Teilnehmer</legend>
+    <label for="knoten">gehörter Knoten</label>
+    <select id="knoten"></select>
+    <label for="teiln">gemessen von</label>
+    <select id="teiln"></select>
+    <p class="hint" id="teiln-hint">Der Teilnehmerfilter gilt für das ganze Archiv und ignoriert den Zeitraum.</p>
+  </fieldset>
+
+  <fieldset id="f-rausch" hidden>
+    <legend>Rauschen</legend>
+    <label><i class="sw stark"></i> ruhig (bis −115 dBm)</label>
+    <label><i class="sw mittel"></i> mittel (bis −108 dBm)</label>
+    <label><i class="sw schwach"></i> laut (über −108 dBm)</label>
+    <p class="hint">Mit Vorsicht lesen: Auto und Tasche heben das Rauschen, die Karte trennt das nicht.</p>
+  </fieldset>
+
+  <section id="stat" aria-live="polite"></section>
+  <p class="hint" id="meta"></p>
+  <p class="hint">Gerechnet aus Zellen von rund 150 m, nicht aus einzelnen Messpunkten. Die Farbe ist der beste je gehörte Wert, nicht der typische.</p>
+  <p class="rechtliches"><a href="https://kaernten-funkt.at/impressum/" target="_blank" rel="noopener">Impressum</a> · <a href="https://kaernten-funkt.at/datenschutz/" target="_blank" rel="noopener">Datenschutz</a></p>
+  <button id="teilen" type="button">Link zu dieser Ansicht kopieren</button>
+</aside>
+<main id="kartewrap">
+  <div id="map" aria-label="Karte"></div>
+  <div id="legende" aria-label="Legende"></div>
+  <div id="zaehler" aria-live="polite"></div>
+</main>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="app.js?v=11"></script>
+</body>
+</html>
