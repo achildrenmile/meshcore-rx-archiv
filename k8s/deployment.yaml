@@ -26,7 +26,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: collector
-          image: ghcr.io/achildrenmile/meshcore-rx-archiv-collector:sha-0000000
+          image: ghcr.io/achildrenmile/meshcore-rx-archiv-collector:sha-f898f47@sha256:b48bf267860eb8dda2231ab3b199fd07d257cbc98a80b6d18d8b5359bf202090
           env:
             - { name: MAP_BASE, value: "https://map.carinthiamesh.com/api/" }
             - { name: BBOX, value: "45.6,12.0,47.7,15.6" }
@@ -45,7 +45,7 @@ spec:
             - { name: data, mountPath: /data }
             - { name: webdata, mountPath: /web-data }
         - name: web
-          image: ghcr.io/achildrenmile/meshcore-rx-archiv-web:sha-0000000
+          image: ghcr.io/achildrenmile/meshcore-rx-archiv-web:sha-f898f47@sha256:1fb7fb92b69fb9bcb65eb2824df9ba95a373398ff5a620afa35d0649b8d056f1
           env:
             - name: CARTO_KEY
               valueFrom: { secretKeyRef: { name: carto-key, key: key } }
