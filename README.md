@@ -121,3 +121,7 @@ python3 -m unittest discover -s tests
 
 Die Daten stammen von `map.carinthiamesh.com` (CoreScope, GPL-3.0). **Der Viewer ist eigener Code** und kopiert nichts aus dem
 Frontend von CoreScope. Genutzt wird nur die Form der öffentlichen Schnittstellen.
+
+## Mitmachen
+
+Fehler, Ideen und Pull Requests sind willkommen, siehe [CONTRIBUTING.md](CONTRIBUTING.md). Ein Merge auf `main` wird automatisch gebaut und ausgerollt.
